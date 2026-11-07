@@ -18,6 +18,7 @@
 # include <stdint.h>
 # include <stdio.h>
 # include <stdlib.h>
+# include <string.h>
 # include <sys/time.h>
 # include <unistd.h>
 
@@ -42,7 +43,6 @@ typedef struct s_philo
 	uint64_t		time_sleep;
 	uint64_t		start_time;
 	uint64_t		last_meal_time;
-	uint64_t		last_sleep_time;
 	pthread_mutex_t	meal_lock;
 	pthread_mutex_t	*r_stick;
 	pthread_mutex_t	*l_stick;
@@ -94,6 +94,8 @@ int					free_mutex_dead_write(t_data *data);
 // Routine utils
 
 void				print_message(char *str, t_philo *philo);
+void				print_death(t_philo *philo);
+void				wait_ms(t_philo *philo, uint64_t ms);
 void				assing_start_time(t_data *data);
 uint64_t			miliseconds_time(void);
 
@@ -128,7 +130,6 @@ int					pick_s_stick(t_philo *philo, pthread_mutex_t *f_s,
 						pthread_mutex_t *s_s);
 int					start_eating(t_philo *philo, pthread_mutex_t *f_s,
 						pthread_mutex_t *s_s);
-void				eat_time(t_philo *philo, uint64_t current_time);
 
 // Waiter Routine
 

@@ -102,45 +102,25 @@ int	pick_s_stick(t_philo *philo, pthread_mutex_t *f_s, pthread_mutex_t *s_s)
 
 int	start_eating(t_philo *philo, pthread_mutex_t *f_s, pthread_mutex_t *s_s)
 {
-	uint64_t	current_time;
-
-	current_time = miliseconds_time();
-	if (waiter_allows(philo))
-		pthread_mutex_lock(&philo->meal_lock);
-	else
+	if (!waiter_allows(philo))
 	{
 		pthread_mutex_unlock(s_s);
 		pthread_mutex_unlock(f_s);
 		return (1);
 	}
-	if (waiter_allows(philo))
-	{
-		philo->last_meal_time = miliseconds_time();
-		current_time = miliseconds_time();
-		philo->number_eaten++;
-		print_message("is eating", philo);
-		eat_time(philo, current_time);
-	}
+	pthread_mutex_lock(&philo->meal_lock);
+	philo->last_meal_time = miliseconds_time();
+	pthread_mutex_unlock(&philo->meal_lock);
+	print_message("is eating", philo);
+	wait_ms(philo, philo->time_eat);
+	pthread_mutex_lock(&philo->meal_lock);
+	philo->number_eaten++;
 	pthread_mutex_unlock(&philo->meal_lock);
 	pthread_mutex_unlock(s_s);
 	pthread_mutex_unlock(f_s);
 	return (SUCCESS);
 }
-// Locks the philosopher's meal_lock.
-// Saves last_meal_time, increments number_eaten, unlocks meal_lock.
-// Calls eat_time() to consume time eating.
-// Releases both forks at the end.
-
-void	eat_time(t_philo *philo, uint64_t current_time)
-{
-	while (current_time - philo->last_meal_time < philo->time_eat)
-	{
-		current_time = miliseconds_time();
-		if (!waiter_allows(philo))
-			break ;
-		usleep(100);
-	}
-}
-// Actively wait (usleep(100)) 
-// until time_eat has passed since it started eating.
-// If at any time the waiter does not give permission, break the loop.
+// Saves last_meal_time under meal_lock and releases it straight away,
+// so the waiter is never blocked while a philosopher eats.
+// Waits time_eat milliseconds.
+// Counts the meal once it is finished and releases both forks.

@@ -108,6 +108,11 @@ int	free_mutex_dead_write(t_data *data)
 		printf("Error freeing write mutex\n");
 		flag = 1;
 	}
+	if (pthread_mutex_destroy(&data->eated_lock) != SUCCESS)
+	{
+		printf("Error freeing eated mutex\n");
+		flag = 1;
+	}
 	if (flag == 1)
 		return (THREAD_ERROR);
 	return (SUCCESS);

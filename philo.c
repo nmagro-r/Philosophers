@@ -36,6 +36,7 @@ int	init_philo(char **argv)
 	data = malloc(sizeof(t_data));
 	if (!data)
 		return (MALLOC_ERROR);
+	memset(data, 0, sizeof(t_data));
 	if (init_program(argv, data) != SUCCESS)
 		return (free_structs(data, MALLOC_ERROR));
 	if (init_routines(data) != SUCCESS)

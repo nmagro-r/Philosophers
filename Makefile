@@ -1,7 +1,7 @@
 NAME = philo
 
 CC = cc
-CFLAGS = -Wall -Wextra -Werror -fsanitize=thread -g
+CFLAGS = -Wall -Wextra -Werror
 
 SRC = philo.c \
 	  check_args.c \
@@ -31,4 +31,7 @@ fclean: clean
 
 re: fclean all
 
-.PHONY: all clean fclean re
+tsan: fclean
+	$(MAKE) CFLAGS="$(CFLAGS) -fsanitize=thread -g"
+
+.PHONY: all clean fclean re tsan

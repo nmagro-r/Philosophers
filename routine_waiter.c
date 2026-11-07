@@ -15,9 +15,7 @@
 void	*waiter_routine(void *param)
 {
 	t_data	*data;
-	int		i;
 
-	i = 0;
 	data = param;
 	while (1)
 	{
@@ -26,7 +24,6 @@ void	*waiter_routine(void *param)
 			break ;
 		if ((data->number_eat >= 0 && all_eated(data) == SUCCESS))
 			break ;
-		i++;
 	}
 	return (param);
 }
@@ -40,22 +37,24 @@ int	dead_philo(t_data *data)
 {
 	int			i;
 	uint64_t	starved;
+	t_philo		*philo;
 
 	i = 0;
 	while (i < data->number_philo)
 	{
-		pthread_mutex_lock(&data->philo_array[i]->meal_lock);
-		if (data->philo_array[i]->last_meal_time == 0)
-			starved = 0;
-		else
-			starved = miliseconds_time() - data->philo_array[i]->last_meal_time;
-		pthread_mutex_unlock(&data->philo_array[i]->meal_lock);
+		philo = data->philo_array[i];
+		starved = 0;
+		pthread_mutex_lock(&philo->meal_lock);
+		if (philo->last_meal_time != 0 && (data->number_eat < 0
+				|| philo->number_eaten < data->number_eat))
+			starved = miliseconds_time() - philo->last_meal_time;
+		pthread_mutex_unlock(&philo->meal_lock);
 		if (starved > data->time_die)
 		{
 			pthread_mutex_lock(&data->dead_lock);
 			data->philo_dead = 1;
-			print_message("died", data->philo_array[i]);
 			pthread_mutex_unlock(&data->dead_lock);
+			print_death(philo);
 			return (SUCCESS);
 		}
 		i++;

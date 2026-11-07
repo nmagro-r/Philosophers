@@ -14,12 +14,34 @@
 
 void	print_message(char *str, t_philo *philo)
 {
-	uint64_t	current_time;
+	unsigned long	current_time;
+
+	pthread_mutex_lock(philo->write_lock);
+	if (waiter_allows(philo))
+	{
+		current_time = miliseconds_time() - philo->start_time;
+		printf("%lu %d %s\n", current_time, philo->philo_id, str);
+	}
+	pthread_mutex_unlock(philo->write_lock);
+}
+
+void	print_death(t_philo *philo)
+{
+	unsigned long	current_time;
 
 	pthread_mutex_lock(philo->write_lock);
 	current_time = miliseconds_time() - philo->start_time;
-	printf("%lu %d %s\n", current_time, philo->philo_id, str);
+	printf("%lu %d died\n", current_time, philo->philo_id);
 	pthread_mutex_unlock(philo->write_lock);
+}
+
+void	wait_ms(t_philo *philo, uint64_t ms)
+{
+	uint64_t	start;
+
+	start = miliseconds_time();
+	while (miliseconds_time() - start < ms && waiter_allows(philo))
+		usleep(100);
 }
 
 void	assing_start_time(t_data *data)
